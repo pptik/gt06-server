@@ -30,6 +30,10 @@ rmq.connect(rmq_config.broker_uri).then(conn => {
                 //this = device
                 // console.log(data);
                 count = count+1;  
+
+                if(data.latitude > 0) {
+                    data.latitude = -data.latitude;
+                }
                 console.log('NO MESSAGE:'+count+'. #' + this.getUID() + ' ( ' +data.latitude + ',' + data.longitude +' )');
                 //console.log("=================================================")  
             
@@ -40,8 +44,10 @@ rmq.connect(rmq_config.broker_uri).then(conn => {
                     let q = await ch.assertQueue(rmq_config.queue_name, {exclusive: false});
                     await ch.bindQueue(q.queue, rmq_config.exchange_name, rmq_config.route_name);
                     //console.log("starting produce via "+rmq_config.route_name);
-                    let msg = {id : this.getUID(), latitude: data.latitude, longitude: data.longitude };
+                    
+                    let msg = {id : this.getUID(), latitude: data.latitude, longitude: data.longitude, time: new Date() };
                     msg = JSON.stringify(msg);
+                    //console.log(msg);
                     let result = await ch.publish(rmq_config.exchange_name, rmq_config.route_name, new Buffer(msg));
                 }catch (err){
                     console.log('publish msg error');
