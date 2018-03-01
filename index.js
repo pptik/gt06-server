@@ -1,14 +1,14 @@
 var gps = require("gps-tracking");
 var count = 0;
 var options = {
-    'debug': true, //We don't want to debug info automatically. We are going to log everything manually so you can check what happens everywhere
+    'debug': false, //We don't want to debug info automatically. We are going to log everything manually so you can check what happens everywhere
     'port': 8090,
     'device_adapter': "GT06"
 }
 
 //connection rabbitmq
 const rmq_config = require('./configs/rmq.json');
-let rmq = require('amqplib');;
+let rmq = require('amqplib');
 
 rmq.connect(rmq_config.broker_uri).then(conn => {
     var server = gps.server(options, function (device, connection) {
@@ -16,29 +16,24 @@ rmq.connect(rmq_config.broker_uri).then(conn => {
         device.on("connected", function (data) {
             console.log("ada tracker yang baru terhubung")
             return data;
-    
         });
     
         device.on("login_request", function (device_id, msg_parts) {
             this.login_authorized(true); 
-            console.log(device_id+ " login");
-    
+            console.log(device_id+ " melakukan login");
+            //console.log("=================================================")
         });
-    
     
         device.on("ping", async function (data) {
     
             try {
                 //this = device
                 // console.log(data);
-                count = count+1;    
-                console.log("NO MESSAGE:  "+count+". #" + this.getUID() + " ( " +data.latitude + "," + data.longitude +" )" );
-                    
+                count = count+1;  
+                console.log('NO MESSAGE:'+count+'. #' + this.getUID() + ' ( ' +data.latitude + ',' + data.longitude +' )');
+                //console.log("=================================================")  
+            
                 //publish to rabbitmq
-                // const rmq_config = require('./configs/rmq.json');
-                // let rmq = require('amqplib');
-                //let connection = await rmq.connect(rmq_config.broker_uri);
-    
                 try {
                     let ch = await conn.createChannel();
                     await ch.assertExchange(rmq_config.exchange_name, 'topic', {durable: false});
