@@ -32,8 +32,8 @@ var server = gps.server(options, function (device, connection) {
             //this = device
             // console.log(data);
             count = count+1;    
-            console.log("NO MESSAGE:  "+count+". (" + this.getUID() + ") " + data.latitude + ", " + data.longitude );
-
+            console.log("NO MESSAGE:  "+count+". #" + this.getUID() + " ( " +data.latitude + "," + data.longitude +" )" );
+                
             //publish to rabbitmq
             const rmq_config = require('./configs/rmq.json');
             let rmq = require('amqplib');
@@ -44,10 +44,9 @@ var server = gps.server(options, function (device, connection) {
                 await ch.assertExchange(rmq_config.exchange_name, 'topic', {durable: false});
                 let q = await ch.assertQueue(rmq_config.queue_name, {exclusive: false});
                 await ch.bindQueue(q.queue, rmq_config.exchange_name, rmq_config.route_name);
-                console.log("starting produce via "+rmq_config.route_name);
-                let msg = {id : data.device_id, latitude: data.latitude, longitude: data.longitude };
+                //console.log("starting produce via "+rmq_config.route_name);
+                let msg = {id : this.getUID(), latitude: data.latitude, longitude: data.longitude };
                 msg = JSON.stringify(msg);
-                console.log('msg payload: '+msg);
                 let result = await ch.publish(rmq_config.exchange_name, rmq_config.route_name, new Buffer(msg));
             }catch (err){
                 console.log('publish msg error');
@@ -58,6 +57,7 @@ var server = gps.server(options, function (device, connection) {
             //console.log(data);
             return data;
         } catch(error) {
+            console.log('something broken');
             console.log(error);
         }
         
