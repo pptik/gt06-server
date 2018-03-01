@@ -23,6 +23,7 @@
   "dependencies": {
     "crc16-ccitt-node": "^1.0.4",
     "gps-tracking": "^1.0.2",
-    "hex-to-binary": "^1.0.1"
+    "hex-to-binary": "^1.0.1",
+    "amqplib": "^0.5.1"
   }
 }
