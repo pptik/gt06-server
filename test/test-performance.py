@@ -13,7 +13,7 @@ messageLocation = bytearray.fromhex('78782222120301030f24c900bd280e0b8b3b311614b
 #messageLocation = '78782222120301030f24c900bd280e0b8b3b311614be01fe59290e003c8f0000001800b4680d0a'
 
 devices = 100
-period = 1
+period = 15
 
 
 class AsyncClient(asyncio.Protocol):
