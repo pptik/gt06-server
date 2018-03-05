@@ -10,7 +10,7 @@ var options = {
 const rmq_config = require('./configs/rmq.json');
 let rmq = require('amqplib');
 
-rmq.connect(rmq_config.broker_uri).then(conn => {
+rmq.connect(rmq_config.broker_uri).then(async (conn) => {
     let ch = await conn.createChannel();
     var server = gps.server(options, function (device, connection) {
         device.on("connected", function (data) {
