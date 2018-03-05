@@ -11,8 +11,8 @@ const rmq_config = require('./configs/rmq.json');
 let rmq = require('amqplib');
 
 rmq.connect(rmq_config.broker_uri).then(conn => {
+    let ch = await conn.createChannel();
     var server = gps.server(options, function (device, connection) {
-
         device.on("connected", function (data) {
             console.log("ada tracker yang baru terhubung")
             return data;
@@ -39,7 +39,6 @@ rmq.connect(rmq_config.broker_uri).then(conn => {
             
                 //publish to rabbitmq
                 try {
-                    let ch = await conn.createChannel();
                     await ch.assertExchange(rmq_config.exchange_name, 'topic', {durable: false});
                     let q = await ch.assertQueue(rmq_config.queue_name, {exclusive: false});
                     await ch.bindQueue(q.queue, rmq_config.exchange_name, rmq_config.route_name);
