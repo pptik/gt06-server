@@ -40,7 +40,7 @@ rmq.connect(rmq_config.broker_uri).then(async (conn) => {
                 //publish to rabbitmq
                 try {
                     await ch.assertExchange(rmq_config.exchange_name, 'topic', {durable: false});
-                    let q = await ch.assertQueue(rmq_config.queue_name, {exclusive: false});
+                    let q = await ch.assertQueue(rmq_config.queue_name, {exclusive: false, messageTtl: 1000});
                     await ch.bindQueue(q.queue, rmq_config.exchange_name, rmq_config.route_name);
                     //console.log("starting produce via "+rmq_config.route_name);
                     
