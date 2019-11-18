@@ -15,17 +15,20 @@ rmq.connect(rmq_config.broker_uri).then(async (conn) => {
     var server = gps.server(options, function (device, connection) {
         device.on("connected", function (data) {
             console.log("ada tracker yang baru terhubung")
+            console.log('connected', data)
             return data;
         });
     
         device.on("login_request", function (device_id, msg_parts) {
             this.login_authorized(true); 
             console.log(device_id+ " melakukan login");
+            console.log('login_request: device_id', device_id)
+            console.log('login_request: msg_parts', msg_parts)
             //console.log("=================================================")
         });
     
         device.on("ping", async function (data) {
-    
+            console.log('ping data', data)
             try {
                 //this = device
                 // console.log(data);
@@ -46,7 +49,7 @@ rmq.connect(rmq_config.broker_uri).then(async (conn) => {
                     
                     let msg = {id : this.getUID(), latitude: data.latitude, longitude: data.longitude, time: new Date() };
                     msg = JSON.stringify(msg);
-                    //console.log(msg);
+                    console.log('to_publish', msg);
                     let result = await ch.publish(rmq_config.exchange_name, rmq_config.route_name, new Buffer(msg));
                 }catch (err){
                     console.log('publish msg error');
