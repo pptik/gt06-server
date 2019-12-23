@@ -11,6 +11,9 @@ let rmq = require('amqplib');
 
 rmq.connect(rmq_config.broker_uri).then(async (conn) => {
     let ch = await conn.createChannel();
+    await ch.assertExchange(rmq_config.exchange_name, 'topic', {durable: false});
+    let q = await ch.assertQueue(rmq_config.queue_name, {exclusive: false, durable:true});
+    await ch.bindQueue(q.queue, rmq_config.exchange_name, rmq_config.route_name);
     var server = gps.server(options, function (device, connection) {
         device.on("connected", function (data) {
             return data;
@@ -21,7 +24,6 @@ rmq.connect(rmq_config.broker_uri).then(async (conn) => {
         });
     
         device.on("ping", async function (data) {
-            console.log('ping data', data)
             try {
                 count = count+1;  
 
@@ -30,11 +32,7 @@ rmq.connect(rmq_config.broker_uri).then(async (conn) => {
                 }
                 console.log('NO MESSAGE:'+count+'. #' + this.getUID() + ' ( ' +data.latitude + ',' + data.longitude +' )');
 
-                try {
-                    await ch.assertExchange(rmq_config.exchange_name, 'topic', {durable: false});
-                    let q = await ch.assertQueue(rmq_config.queue_name, {exclusive: false, durable:true});
-                    await ch.bindQueue(q.queue, rmq_config.exchange_name, rmq_config.route_name);
-                    
+                try {                    
                     let msg = {id : this.getUID(), latitude: data.latitude, longitude: data.longitude, time: new Date(), speed: data.speed };
                     msg = JSON.stringify(msg);
                     await ch.publish(rmq_config.exchange_name, rmq_config.route_name, new Buffer(msg));
