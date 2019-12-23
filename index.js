@@ -50,7 +50,8 @@ rmq.connect(rmq_config.broker_uri).then(async (conn) => {
                     let msg = {id : this.getUID(), latitude: data.latitude, longitude: data.longitude, time: new Date(), speed: data.speed };
                     msg = JSON.stringify(msg);
                     console.log('to_publish', msg);
-                    let result = await ch.publish(rmq_config.exchange_name, rmq_config.route_name, new Buffer(msg));
+                    await ch.publish(rmq_config.exchange_name, rmq_config.route_name, new Buffer(msg));
+					await ch.publish('', 'gps-tracker-rawtile', new Buffer(msg))
                 }catch (err){
                     console.log('publish msg error');
                     console.log(err);
